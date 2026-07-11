@@ -14,20 +14,19 @@ const TTS = {
 
 // ── 移动端：Google Translate TTS ──────────────────
 // 非官方接口，返回高质量 MP3 音频，真人感远超 Web Speech API
-// 单次请求最长约 200 字符，超长文本自动分句播放
+// 注：不能使用 fetch()（CORS 拦截），直接用 <audio> 标签播放（无 CORS 限制）
 
-const GTTS_MAX_CHUNK = 180; // 略低于上限，留余量
+const GTTS_MAX_CHUNK = 200; // Google TTS 单次请求最长 ~200 字符
 
 /**
  * 用 Google Translate TTS 朗读文本（移动端专用）
- * 支持长文本自动分块顺序播放
+ * 直接用 <audio> 加载 Google TTS URL 播放，绕过 CORS
  * @param {string} text - 日语文本
  * @returns {Promise<void>}
  */
 async function speakTextGoogle(text) {
   if (!text) return;
 
-  // 按句号、换行或逗号拆分，确保每块不超过 GTTS_MAX_CHUNK
   const chunks = splitTextForTTS(text, GTTS_MAX_CHUNK);
 
   for (const chunk of chunks) {
@@ -35,17 +34,9 @@ async function speakTextGoogle(text) {
       + encodeURIComponent(chunk);
 
     try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const blob = await resp.blob();
-      if (blob.size < 500) throw new Error('Response too small, likely empty audio');
-
-      const audioUrl = URL.createObjectURL(blob);
-      await playAudioBlob(audioUrl);
-      URL.revokeObjectURL(audioUrl);
+      await playAudioUrl(url);
     } catch (e) {
-      console.warn('Google TTS 获取失败，回退到 Web Speech API:', e.message);
-      // 失败时回退到浏览器内置语音
+      console.warn('Google TTS 失败，回退到 Web Speech API:', e.message);
       await speakTextWebSpeech(chunk);
     }
   }
@@ -87,13 +78,13 @@ function splitTextForTTS(text, maxLen) {
 }
 
 /**
- * 播放 Blob URL 音频
+ * 用 <audio> 标签直接播放 URL 音频（无 CORS 限制）
  */
-function playAudioBlob(url) {
+function playAudioUrl(url) {
   return new Promise((resolve, reject) => {
     const audio = new Audio(url);
-    audio.onended = () => resolve();
-    audio.onerror = () => reject(new Error('Audio playback failed'));
+    audio.onended = () => { audio.remove(); resolve(); };
+    audio.onerror = () => { audio.remove(); reject(new Error('Audio load failed')); };
     audio.play().catch(reject);
   });
 }
