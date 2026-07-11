@@ -98,7 +98,7 @@ function navigateTo(page, data) {
 
   switch (page) {
     case 'home':
-      renderHome();
+      renderHome(true);
       break;
     case 'kana-chart':    renderKanaChart(data || APP.selectedRow); break;
     case 'kana-detail':   renderKanaDetail(data); break;
@@ -118,8 +118,17 @@ function navigateTo(page, data) {
 }
 
 // 渲染主页（含场景卡片网格 + 随机名言）
-// 始终强制重建完整 DOM，避免其他页面 innerHTML 替换后遗留的碎片状态
-function renderHome() {
+// showScenarios=false 时仅显示欢迎画面（首次加载）
+function renderHome(showScenarios) {
+  // 是否显示场景区域（默认 true，仅首次加载时传 false）
+  if (showScenarios === undefined) showScenarios = true;
+
+  const scenarioSection = showScenarios ? `
+      <p class="crt-hint">> シーンを 選んでください</p>
+      <div id="scenario-grid"></div>
+      <p class="crt-hint cursor-blink" style="margin-top:12px;">■</p>` : `
+      <p class="crt-hint cursor-blink" style="margin-top:12px;">■</p>`;
+
   D.crt.innerHTML = `
     <div class="crt-page active" id="page-home">
       <pre class="crt-banner">
@@ -130,10 +139,7 @@ function renderHome() {
 ╚════════════════════════════════╝
       </pre>
       <p class="crt-prompt">READY.</p>
-      <p class="crt-hint">> シーンを 選んでください</p>
-      <div id="crt-quote"></div>
-      <div id="scenario-grid"></div>
-      <p class="crt-hint cursor-blink" style="margin-top:12px;">■</p>
+      <div id="crt-quote"></div>${scenarioSection}
     </div>
     <div class="crt-page" id="page-kana-chart"></div>
     <div class="crt-page" id="page-kana-detail"></div>
@@ -143,7 +149,7 @@ function renderHome() {
 
   D.statusMsg.textContent = 'SYS OK';
   renderRandomQuote();
-  renderScenarioList();
+  if (showScenarios) renderScenarioList();
 }
 
 // 随机展示一句名言
@@ -980,7 +986,9 @@ function initApp() {
   updateBrightness(70);
   D.ledAudio.classList.add('on'); // audio ready
 
-  navigateTo('home');
+  // 首次加载仅显示欢迎画面，不展示场景卡片
+  APP.currentPage = 'home';
+  renderHome(false);
   console.log('🔹 SYS OK');
 }
 
