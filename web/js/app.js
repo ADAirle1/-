@@ -31,7 +31,7 @@ const D = {
   tintSlider: $('#tint-slider'),
   scanlineSlider: $('#scanline-slider'),
   // Buttons
-  btnSpeak: $('#btn-speak'),
+  btnScene: $('#btn-scene'),
   btnNext: $('#btn-next'),
   btnReset: $('#btn-reset'),
   // Status
@@ -41,6 +41,8 @@ const D = {
   // LEDs
   ledAudio: $('#led-audio'),
   ledData: $('#led-data'),
+  // 抽屉
+  cpDrawerToggle: $('#cp-drawer-toggle'),
 };
 
 // ═══════════════════════════════════════════════
@@ -84,8 +86,10 @@ function updateBrightness(val) {
 // ═══════════════════════════════════════════════
 
 function navigateTo(page, data) {
-  // 关闭弹出框
+  // 关闭弹出框和设置抽屉
   if (APP.popoverVisible) closePopover(true);
+  const cp = $('#control-panel');
+  if (cp) cp.classList.remove('panel-open');
 
   APP.currentPage = page;
   $$('.crt-page').forEach(p => p.classList.remove('active'));
@@ -106,6 +110,11 @@ function navigateTo(page, data) {
   D.knobPositions.forEach(sp => {
     sp.classList.toggle('active', sp.dataset.mode === page);
   });
+  // 同步旋钮圆点旋转
+  modeIdx = modes.indexOf(page);
+  if (modeIdx === -1) modeIdx = 0;
+  const dot = knobMode ? knobMode.querySelector('.knob-dot') : null;
+  if (dot) dot.style.transform = `translateX(-50%) rotate(${modeIdx * 90}deg)`;
 }
 
 // 渲染主页（含场景卡片网格 + 随机名言）
@@ -598,9 +607,11 @@ function renderQuiz() { navigateTo('quiz'); }
 // 场景化学习
 // ═══════════════════════════════════════════════
 
-// 每页显示数量
-const WORDS_PER_PAGE = 5;
-const PHRASES_PER_PAGE = 4;
+// 每页显示数量（确保不溢出 CRT 屏幕 600px 工作区）
+const WORDS_PER_PAGE = 4;
+const PHRASES_PER_PAGE = 3;
+const DIALOGUE_PER_PAGE = 3;
+const CULTURE_PER_PAGE = 4;
 
 // 主页渲染场景卡片网格
 function renderScenarioList() {
@@ -658,6 +669,9 @@ function renderScenarioPage() {
     case 'culture':  content = renderCultureContent(); break;
   }
 
+  // 生成翻页器（独立于内容，固定于底部）
+  const pager = makeScenarioPager();
+
   D.crt.innerHTML = `
     <div class="crt-page active" id="page-scenario">
       <div class="scenario-header">
@@ -666,6 +680,7 @@ function renderScenarioPage() {
       </div>
       <div class="scenario-tabs">${tabs}</div>
       <div id="scenario-content">${content}</div>
+      <div id="scenario-pager-wrap">${pager}</div>
     </div>
   `;
 
@@ -700,11 +715,8 @@ function renderWordsContent() {
       </div>`;
   });
 
-  html += pagerHTML(page, totalPages, 'words');
   return html;
 }
-
-// ── 短句 Tab ──
 function renderPhrasesContent() {
   const sc = APP.currentScenario;
   const phrases = sc.phrases;
@@ -724,7 +736,6 @@ function renderPhrasesContent() {
       </div>`;
   });
 
-  html += pagerHTML(page, totalPages, 'phrases');
   return html;
 }
 
@@ -732,10 +743,15 @@ function renderPhrasesContent() {
 function renderDialogueContent() {
   const sc = APP.currentScenario;
   const dlg = sc.dialogue;
+  if (!dlg || !dlg.lines) return '<p class="crt-hint">> NO DIALOGUE DATA</p>';
+  const totalPages = Math.ceil(dlg.lines.length / DIALOGUE_PER_PAGE);
+  const page = APP.scenarioPage;
+  const start = page * DIALOGUE_PER_PAGE;
+  const pageLines = dlg.lines.slice(start, start + DIALOGUE_PER_PAGE);
 
   let html = `<p class="crt-prompt" style="font-size:11px;">🎭 ${dlg.title}</p>`;
 
-  dlg.lines.forEach((line, i) => {
+  pageLines.forEach((line, i) => {
     const isCustomer = line.role === dlg.roles[1]; // 第二个角色 = 学习者角色
     const cls = isCustomer ? ' dialogue-line dl-customer' : ' dialogue-line';
     html += `
@@ -754,17 +770,39 @@ function renderDialogueContent() {
 // ── 文化贴士 Tab ──
 function renderCultureContent() {
   const sc = APP.currentScenario;
+  const totalPages = Math.ceil(sc.culture.length / CULTURE_PER_PAGE);
+  const page = APP.scenarioPage;
+  const start = page * CULTURE_PER_PAGE;
+  const pageTips = sc.culture.slice(start, start + CULTURE_PER_PAGE);
+
   let html = '';
-  sc.culture.forEach((tip, i) => {
+  pageTips.forEach((tip, i) => {
+    const idx = start + i;
     html += `
       <div class="culture-item">
-        <span class="ci-num">0${i+1}</span> ${tip}
+        <span class="ci-num">${String(idx + 1).padStart(2, '0')}</span> ${tip}
       </div>`;
   });
+
   return html;
 }
 
 // ── 分页器 ──
+// 根据当前 Tab 计算页码并生成翻页 HTML
+function makeScenarioPager() {
+  const sc = APP.currentScenario;
+  if (!sc) return '';
+  let total;
+  switch (APP.scenarioTab) {
+    case 'words':    total = Math.ceil(sc.words.length / WORDS_PER_PAGE); break;
+    case 'phrases':  total = Math.ceil(sc.phrases.length / PHRASES_PER_PAGE); break;
+    case 'dialogue': total = sc.dialogue ? Math.ceil(sc.dialogue.lines.length / DIALOGUE_PER_PAGE) : 0; break;
+    case 'culture':  total = sc.culture ? Math.ceil(sc.culture.length / CULTURE_PER_PAGE) : 0; break;
+    default: total = 0;
+  }
+  return pagerHTML(APP.scenarioPage, total, APP.scenarioTab);
+}
+
 function pagerHTML(page, totalPages, tabId) {
   if (totalPages <= 1) return '';
   return `
@@ -783,8 +821,15 @@ function scenarioPrevPage() {
 }
 function scenarioNextPage() {
   const sc = APP.currentScenario;
-  const perPage = APP.scenarioTab === 'words' ? WORDS_PER_PAGE : PHRASES_PER_PAGE;
-  const items = APP.scenarioTab === 'words' ? sc.words : sc.phrases;
+  let perPage, items;
+  switch (APP.scenarioTab) {
+    case 'words':    perPage = WORDS_PER_PAGE;    items = sc.words; break;
+    case 'phrases':  perPage = PHRASES_PER_PAGE;  items = sc.phrases; break;
+    case 'dialogue': perPage = DIALOGUE_PER_PAGE; items = sc.dialogue ? sc.dialogue.lines : []; break;
+    case 'culture':  perPage = CULTURE_PER_PAGE;  items = sc.culture || []; break;
+    default: return;
+  }
+  if (!items.length) return;
   const maxPage = Math.ceil(items.length / perPage) - 1;
   if (APP.scenarioPage < maxPage) {
     APP.scenarioPage++;
@@ -813,7 +858,11 @@ async function doScenarioSpeak(text) {
 // 模式旋钮位置点击
 D.knobPositions.forEach(sp => {
   sp.addEventListener('click', () => {
+    modeIdx = modes.indexOf(sp.dataset.mode);
+    if (modeIdx === -1) modeIdx = 0;
     navigateTo(sp.dataset.mode);
+    const dot = knobMode ? knobMode.querySelector('.knob-dot') : null;
+    if (dot) dot.style.transform = `translateX(-50%) rotate(${modeIdx * 90}deg)`;
   });
 });
 
@@ -861,7 +910,7 @@ if (knobBright) {
 // 模式旋钮
 const knobMode = $('#knob-mode');
 let modeIdx = 0;
-const modes = ['home', 'kana-chart', 'quiz', 'kana-detail'];
+const modes = ['kana-chart', 'quiz', 'kana-detail', 'home'];
 if (knobMode) {
   knobMode.addEventListener('click', () => {
     modeIdx = (modeIdx + 1) % modes.length;
@@ -872,7 +921,7 @@ if (knobMode) {
 }
 
 // 操作按钮
-D.btnSpeak.addEventListener('click', () => doSpeak());
+D.btnScene.addEventListener('click', () => navigateTo('home'));
 D.btnNext.addEventListener('click', () => {
   if (APP.currentPage === 'kana-detail') nextKana();
   else if (APP.currentPage === 'quiz' && QUIZ.active && QUIZ.answered) nextQuizQuestion();
@@ -882,12 +931,34 @@ D.btnReset.addEventListener('click', () => {
   D.statusScore.textContent = 'SCORE: --';
 });
 
+// ── 设置抽屉切换 ──
+if (D.cpDrawerToggle) {
+  D.cpDrawerToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    $('#control-panel').classList.toggle('panel-open');
+  });
+}
+// 点击控制面板外区域关闭抽屉
+document.addEventListener('click', (e) => {
+  const panel = $('#control-panel');
+  if (!panel || !panel.classList.contains('panel-open')) return;
+  if (!e.target.closest('#control-panel')) {
+    panel.classList.remove('panel-open');
+  }
+});
+
 // 键盘
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') { e.preventDefault(); if (APP.currentPage==='kana-detail') prevKana(); }
   if (e.key === 'ArrowRight') { e.preventDefault(); if (APP.currentPage==='kana-detail') nextKana(); }
   if (e.key === 'Escape') {
     e.preventDefault();
+    // 优先关闭设置抽屉
+    const cp = $('#control-panel');
+    if (cp && cp.classList.contains('panel-open')) {
+      cp.classList.remove('panel-open');
+      return;
+    }
     if (APP.popoverVisible) { closePopover(); return; }
     navigateTo('home');
   }

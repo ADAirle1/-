@@ -32,79 +32,89 @@
     <!-- ══════════════ 左侧：控制面板 ══════════════ -->
     <aside id="control-panel">
 
-      <!-- 面板标签 -->
-      <div class="panel-label">CONTROL PANEL</div>
+      <!-- ══ 工具栏：常用控件始终可见 ══ -->
+      <div class="cp-bar">
+        <div class="panel-label">CONTROL PANEL</div>
 
-      <!-- ── 模式选择旋钮 ── -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">MODE SELECT</div>
-        <div class="knob-row">
-          <div class="knob" id="knob-mode" data-val="0">
-            <div class="knob-dot"></div>
-          </div>
-          <div class="knob-positions">
-            <span data-mode="kana-chart">五十音</span>
-            <span data-mode="quiz">テスト</span>
-            <span data-mode="kana-detail">詳細</span>
-            <span data-mode="home">场景</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 显示切换 ── -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">DISPLAY</div>
-        <div class="switch-row">
-          <button class="sw-btn active" id="sw-hiragana">平仮名</button>
-          <button class="sw-btn" id="sw-katakana">片仮名</button>
-        </div>
-      </div>
-
-      <!-- ── 屏幕色调滑块 ── -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">SCREEN TINT</div>
-        <div class="slider-track">
-          <input type="range" id="tint-slider" min="0" max="100" value="50" />
-        </div>
-        <div class="tint-labels">
-          <span>AMB</span><span>GRN</span>
-        </div>
-      </div>
-
-      <!-- ── 扫描线强度 ── -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">SCANLINE INT.</div>
-        <div class="slider-track">
-          <input type="range" id="scanline-slider" min="0" max="100" value="60" />
-        </div>
-      </div>
-
-      <!-- ── 亮度旋钮 ── -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">BRIGHTNESS</div>
-        <div class="knob-row">
-          <div class="knob small" id="knob-bright" data-val="70">
-            <div class="knob-dot"></div>
+        <!-- 模式选择旋钮 -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">MODE SELECT</div>
+          <div class="knob-row">
+            <div class="knob" id="knob-mode" data-val="0">
+              <div class="knob-dot"></div>
+            </div>
+            <div class="knob-positions">
+              <span data-mode="kana-chart">五十音</span>
+              <span data-mode="quiz">テスト</span>
+              <span data-mode="kana-detail">詳細</span>
+              <span data-mode="home">场景</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- ── 操作按钮 ── -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">ACTION</div>
-        <button class="hw-btn primary" id="btn-speak">🔊 SPEAK</button>
-        <button class="hw-btn" id="btn-next">▶ NEXT</button>
-        <button class="hw-btn danger" id="btn-reset">◼ RESET</button>
-      </div>
-
-      <!-- ── 指示灯 ── -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">STATUS</div>
-        <div class="indicator-row">
-          <span class="led on" id="led-power"></span><span class="led-label">PWR</span>
-          <span class="led" id="led-audio"></span><span class="led-label">AUD</span>
-          <span class="led" id="led-data"></span><span class="led-label">DAT</span>
+        <!-- 显示切换 -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">DISPLAY</div>
+          <div class="switch-row">
+            <button class="sw-btn active" id="sw-hiragana">平仮名</button>
+            <button class="sw-btn" id="sw-katakana">片仮名</button>
+          </div>
         </div>
+
+        <!-- 操作按钮 -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">ACTION</div>
+          <button class="hw-btn scene" id="btn-scene">🏠 SCENE</button>
+          <button class="hw-btn" id="btn-next">▶ NEXT</button>
+          <button class="hw-btn danger" id="btn-reset">◼ RESET</button>
+        </div>
+
+        <!-- 抽屉开关 -->
+        <button class="cp-drawer-toggle" id="cp-drawer-toggle" aria-label="更多设置">▼</button>
+      </div>
+
+      <!-- ══ 抽屉：设置类控件默认隐藏 ══ -->
+      <div class="cp-drawer" id="cp-drawer">
+
+        <!-- 屏幕色调滑块 -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">SCREEN TINT</div>
+          <div class="slider-track">
+            <input type="range" id="tint-slider" min="0" max="100" value="50" />
+          </div>
+          <div class="tint-labels">
+            <span>AMB</span><span>GRN</span>
+          </div>
+        </div>
+
+        <!-- 扫描线强度 -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">SCANLINE INT.</div>
+          <div class="slider-track">
+            <input type="range" id="scanline-slider" min="0" max="100" value="60" />
+          </div>
+        </div>
+
+        <!-- 亮度旋钮 -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">BRIGHTNESS</div>
+          <div class="knob-row">
+            <div class="knob small" id="knob-bright" data-val="70">
+              <div class="knob-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 指示灯 -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">STATUS</div>
+          <div class="indicator-row">
+            <span class="led on" id="led-power"></span><span class="led-label">PWR</span>
+            <span class="led" id="led-audio"></span><span class="led-label">AUD</span>
+            <span class="led" id="led-data"></span><span class="led-label">DAT</span>
+          </div>
+        </div>
+
       </div>
 
     </aside>
