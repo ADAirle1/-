@@ -118,35 +118,28 @@ function navigateTo(page, data) {
 }
 
 // 渲染主页（含场景卡片网格 + 随机名言）
+// 始终强制重建完整 DOM，避免其他页面 innerHTML 替换后遗留的碎片状态
 function renderHome() {
-  // 检查主页 DOM 是否存在（可能被其他页面的 innerHTML 替换掉了）
-  let homePage = $('#page-home');
-  if (!homePage) {
-    D.crt.innerHTML = `
-      <div class="crt-page active" id="page-home">
-        <pre class="crt-banner">
+  D.crt.innerHTML = `
+    <div class="crt-page active" id="page-home">
+      <pre class="crt-banner">
 ╔════════════════════════════════╗
 ║    ドット先生  DOT SENSEI     ║
 ║    LANGUAGE LEARNING TERM    ║
 ║    MODEL DS-1  v2.0  RAM 64K ║
 ╚════════════════════════════════╝
-        </pre>
-        <p class="crt-prompt">READY.</p>
-        <p class="crt-hint">> シーンを 選んでください</p>
-        <div id="crt-quote"></div>
-        <div id="scenario-grid"></div>
-        <p class="crt-hint cursor-blink" style="margin-top:12px;">■</p>
-      </div>
-      <div class="crt-page" id="page-kana-chart"></div>
-      <div class="crt-page" id="page-kana-detail"></div>
-      <div class="crt-page" id="page-quiz"></div>
-      <div class="crt-page" id="page-scenario"></div>
-    `;
-  } else {
-    // 已存在，只切换 active
-    $$('.crt-page').forEach(p => p.classList.remove('active'));
-    homePage.classList.add('active');
-  }
+      </pre>
+      <p class="crt-prompt">READY.</p>
+      <p class="crt-hint">> シーンを 選んでください</p>
+      <div id="crt-quote"></div>
+      <div id="scenario-grid"></div>
+      <p class="crt-hint cursor-blink" style="margin-top:12px;">■</p>
+    </div>
+    <div class="crt-page" id="page-kana-chart"></div>
+    <div class="crt-page" id="page-kana-detail"></div>
+    <div class="crt-page" id="page-quiz"></div>
+    <div class="crt-page" id="page-scenario"></div>
+  `;
 
   D.statusMsg.textContent = 'SYS OK';
   renderRandomQuote();

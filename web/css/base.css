@@ -461,7 +461,7 @@ body {
 .crt-page.active { display: block; }
 
 /* ── 场景页 flex 布局：翻页固定在底部 ── */
-#page-scenario {
+#page-scenario.active {
   display: flex;
   flex-direction: column;
   height: 100%;
