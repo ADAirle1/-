@@ -2,10 +2,17 @@
 // Web Speech API（浏览器内置日语语音）
 // 优化：更大音量、更清晰发音
 
+// 平台检测：移动端语音引擎对 rate 参数的解释与桌面端不同
+// 相同 rate 值在移动端（Android/iOS）朗读速度明显快于桌面端
+// 因此移动端使用更低的 rate 值 + 更低音高，消除电子音、接近真人语速
+const _isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
 const TTS = {
   speaking: false,
-  rate: 0.75,    // 更慢 = 更清晰（默认 0.85 → 0.75）
-  pitch: 1.05,   // 微调音高，更自然（默认 1.1 → 1.05）
+  // 桌面端保持默认语速；移动端大幅降低语速，减少电子感，接近真人朗读节奏
+  rate: _isMobile ? 0.38 : 0.75,
+  // 移动端微降音高可进一步减少合成感（桌面保持 1.05）
+  pitch: _isMobile ? 0.95 : 1.05,
   volume: 1.0,   // 最大音量
 };
 

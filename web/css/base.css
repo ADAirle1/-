@@ -255,7 +255,7 @@ body {
 }
 .sw-btn {
   flex: 1;
-  padding: 10px 8px;
+  padding: 8px 8px;
   background: linear-gradient(180deg, #E8E4DF 0%, #D0CBC3 100%);
   border: none;
   border-radius: 4px;
@@ -332,8 +332,8 @@ body {
 .hw-btn {
   display: block;
   width: 100%;
-  margin-top: 5px;
-  padding: 12px 10px;
+  margin-top: 3px;
+  padding: 8px 8px;
   background: linear-gradient(180deg, #EFECE7 0%, #D5D0C8 100%);
   border: none;
   border-radius: 5px;
@@ -1359,8 +1359,8 @@ body {
   .knob-dot { top: 4px; height: 7px; }
   .knob.small .knob-dot { top: 3px; height: 5px; }
   .knob-positions span { font-size: 7px; }
-  .hw-btn { padding: 6px 4px; font-size: 7px; margin-top: 3px; }
-  .sw-btn { padding: 5px 3px; font-size: 7px; }
+  .hw-btn { padding: 5px 4px; font-size: 7px; margin-top: 2px; }
+  .sw-btn { padding: 4px 3px; font-size: 7px; }
 
   /* CRT 屏幕 */
   #screen-unit { flex: 1; min-height: 360px; }
@@ -1511,17 +1511,17 @@ body {
   /* 显示开关 */
   .cp-bar .switch-row { gap: 4px; }
   .cp-bar .sw-btn {
-    padding: 8px 8px;
+    padding: 6px 8px;
     font-size: 10px;
-    min-height: 34px;
+    min-height: 28px;
   }
 
   /* 操作按钮 */
   .cp-bar .hw-btn {
-    padding: 10px 8px;
+    padding: 7px 8px;
     font-size: 9px;
     margin-top: 2px;
-    min-height: 38px;
+    min-height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
