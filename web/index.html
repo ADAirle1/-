@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ドット先生 — Terminal</title>
+  <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+   硬件终端外壳
+   ═══════════════════════════════════════════════════════════ -->
+<div id="terminal">
+
+  <!-- ══ 外壳螺丝 ══ -->
+  <div class="screw" style="top:10px;left:12px;"></div>
+  <div class="screw" style="top:10px;right:12px;"></div>
+  <div class="screw" style="bottom:10px;left:12px;"></div>
+  <div class="screw" style="bottom:10px;right:12px;"></div>
+
+  <!-- ══ 顶部铭牌 ══ -->
+  <div id="nameplate">
+    <span class="np-model">MODEL DS-1</span>
+    <span class="np-brand">ドット先生</span>
+    <span class="np-year">1984</span>
+  </div>
+
+  <!-- ══ 主工作区 ══ -->
+  <div id="work-area">
+
+    <!-- ══════════════ 左侧：控制面板 ══════════════ -->
+    <aside id="control-panel">
+
+      <!-- 面板标签 -->
+      <div class="panel-label">CONTROL PANEL</div>
+
+      <!-- ── 模式选择旋钮 ── -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">MODE SELECT</div>
+        <div class="knob-row">
+          <div class="knob" id="knob-mode" data-val="0">
+            <div class="knob-dot"></div>
+          </div>
+          <div class="knob-positions">
+            <span data-mode="kana-chart">五十音</span>
+            <span data-mode="quiz">テスト</span>
+            <span data-mode="kana-detail">詳細</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 显示切换 ── -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">DISPLAY</div>
+        <div class="switch-row">
+          <button class="sw-btn active" id="sw-hiragana">平仮名</button>
+          <button class="sw-btn" id="sw-katakana">片仮名</button>
+        </div>
+      </div>
+
+      <!-- ── 屏幕色调滑块 ── -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">SCREEN TINT</div>
+        <div class="slider-track">
+          <input type="range" id="tint-slider" min="0" max="100" value="50" />
+        </div>
+        <div class="tint-labels">
+          <span>AMB</span><span>GRN</span>
+        </div>
+      </div>
+
+      <!-- ── 扫描线强度 ── -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">SCANLINE INT.</div>
+        <div class="slider-track">
+          <input type="range" id="scanline-slider" min="0" max="100" value="60" />
+        </div>
+      </div>
+
+      <!-- ── 亮度旋钮 ── -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">BRIGHTNESS</div>
+        <div class="knob-row">
+          <div class="knob small" id="knob-bright" data-val="70">
+            <div class="knob-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 操作按钮 ── -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">ACTION</div>
+        <button class="hw-btn primary" id="btn-speak">🔊 SPEAK</button>
+        <button class="hw-btn" id="btn-next">▶ NEXT</button>
+        <button class="hw-btn danger" id="btn-reset">◼ RESET</button>
+      </div>
+
+      <!-- ── 指示灯 ── -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">STATUS</div>
+        <div class="indicator-row">
+          <span class="led on" id="led-power"></span><span class="led-label">PWR</span>
+          <span class="led" id="led-audio"></span><span class="led-label">AUD</span>
+          <span class="led" id="led-data"></span><span class="led-label">DAT</span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ══════════════ 右侧：CRT 屏幕 ══════════════ -->
+    <main id="screen-unit">
+
+      <!-- 屏幕外壳 -->
+      <div id="screen-bezel">
+        <!-- CRT 玻璃面板 -->
+        <div id="crt-glass">
+          <!-- 屏幕内容 -->
+          <div id="crt-content">
+            <!-- 动态内容由 JS 渲染到这里 -->
+            <div class="crt-page active" id="page-home">
+              <pre class="crt-banner">
+╔════════════════════════════════╗
+║    ドット先生  DOT SENSEI     ║
+║    LANGUAGE LEARNING TERM    ║
+║    MODEL DS-1  v2.0  RAM 64K ║
+╚════════════════════════════════╝
+              </pre>
+              <p class="crt-prompt">READY.</p>
+              <p class="crt-hint">TURN MODE KNOB TO BEGIN</p>
+              <p class="crt-hint cursor-blink">■</p>
+            </div>
+            <div class="crt-page" id="page-kana-chart"></div>
+            <div class="crt-page" id="page-kana-detail"></div>
+            <div class="crt-page" id="page-quiz"></div>
+          </div>
+
+          <!-- CRT 效果叠加层 -->
+          <div class="crt-scanlines"></div>
+          <div class="crt-vignette"></div>
+          <div class="crt-glare"></div>
+        </div>
+
+        <!-- 屏幕下方标签 -->
+        <div class="screen-badge">CRT-9A  AMBER DISPLAY</div>
+
+        <!-- 屏幕下方小指示灯 -->
+        <div class="screen-led-row">
+          <span class="s-led on"></span>
+          <span class="s-led on"></span>
+          <span class="s-led dim"></span>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ══ 底部状态栏 ══ -->
+  <div id="status-bar">
+    <span id="status-msg">SYS OK</span>
+    <span class="status-div">|</span>
+    <span id="status-score">SCORE: --</span>
+    <span class="status-div">|</span>
+    <span id="status-clock">00:00</span>
+  </div>
+
+</div>
+
+<!-- ══ JavaScript ══ -->
+<script src="js/kana-data.js"></script>
+<script src="js/tts.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

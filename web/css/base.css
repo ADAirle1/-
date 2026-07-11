@@ -1,0 +1,1008 @@
+/* ═══════════════════════════════════════════════════════════
+   ドット先生 — 硬件终端 UI
+   白色工业外壳 + CRT 琥珀屏 + 实体控件
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
+/* ── 变量 ──────────────────────────────────── */
+:root {
+  /* 外壳 */
+  --shell:        #E6E2DD;
+  --shell-d:      #D4CFC9;
+  --shell-dd:     #BFB9B2;
+  --shell-l:      #F2EFEB;
+  --panel:        #DCD7D1;
+  --panel-d:      #C8C3BC;
+
+  /* CRT 琥珀屏 */
+  --crt-bg:       #0E0C00;
+  --crt-amber:    #FFB000;
+  --crt-amber-d:  #CC8800;
+  --crt-amber-l:  #FFD060;
+  --crt-glow:     rgba(255, 176, 0, 0.15);
+
+  /* CRT 绿屏（备用） */
+  --crt-green:    #33FF33;
+  --crt-green-d:  #22BB22;
+
+  /* UI */
+  --text:         #2C2416;
+  --text-sub:     #6B6258;
+  --accent:       #C44B3C;
+  --metal:        #B0ACA6;
+  --metal-d:      #8A8580;
+
+  /* 按钮 */
+  --btn-face:     #E8E4DF;
+  --btn-edge:     #C8C3BC;
+  --btn-shadow:   #A8A29B;
+
+  /* 字体 */
+  --mono:         'Share Tech Mono', 'Courier New', monospace;
+  --pixel:        'Press Start 2P', monospace;
+  --jp:           'DotGothic16', 'MS Gothic', monospace;
+}
+
+/* ── 全局 ──────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: #8B857E;
+  background-image:
+    radial-gradient(ellipse at 50% 30%, #9E9890 0%, #6B6560 100%);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  color: var(--text);
+  padding: 20px;
+}
+
+/* ══════════════════════════════════════════════
+   终端外壳
+   ══════════════════════════════════════════════ */
+#terminal {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  background: linear-gradient(175deg,
+    var(--shell-l) 0%,
+    var(--shell) 15%,
+    var(--shell-d) 70%,
+    var(--shell-dd) 100%
+  );
+  border-radius: 12px;
+  box-shadow:
+    /* 外壳厚度 */
+    0 1px 0 #FFF inset,
+    0 -1px 0 rgba(0,0,0,0.08) inset,
+    /* 外部投影 */
+    0 8px 32px rgba(0,0,0,0.4),
+    0 2px 6px rgba(0,0,0,0.3),
+    0 0 0 2px #A8A29A;
+  padding: 16px 18px 10px;
+  /* 细微颗粒纹理 */
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='4' stitchTiles='stitch' type='fractalNoise'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ── 螺丝 ────────────────────────────────── */
+.screw {
+  position: absolute;
+  width: 14px; height: 14px;
+  background: radial-gradient(circle at 40% 35%, #D8D3CC, #B0AAA2);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.5),
+    0 1px 1px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+.screw::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 2px;
+  background: #9A948C;
+  /* 十字槽 */
+  box-shadow:
+    2px 0 0 #7A746E,
+    -2px 0 0 #7A746E,
+    0 2px 0 #C0BAB2,
+    0 -2px 0 #C0BAB2;
+}
+
+/* ── 顶部铭牌 ────────────────────────────── */
+#nameplate {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 4px 10px;
+  border-bottom: 2px solid var(--panel-d);
+  margin-bottom: 10px;
+}
+.np-model {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-sub);
+  letter-spacing: 2px;
+}
+.np-brand {
+  font-family: var(--jp);
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+.np-year {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--metal-d);
+}
+
+/* ══════════════════════════════════════════════
+   主工作区
+   ══════════════════════════════════════════════ */
+#work-area {
+  display: flex;
+  gap: 14px;
+  height: 520px;
+}
+
+/* ══════════════════════════════════════════════
+   左侧控制面板
+   ══════════════════════════════════════════════ */
+#control-panel {
+  width: 210px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-d) 100%);
+  border-radius: 6px;
+  padding: 14px 12px;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    inset 0 -2px 0 rgba(0,0,0,0.1),
+    inset 2px 0 0 rgba(0,0,0,0.05),
+    inset -2px 0 0 rgba(0,0,0,0.05),
+    0 2px 4px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.panel-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--metal-d);
+  text-align: center;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--metal);
+}
+
+/* ── 控件组 ──────────────────────────────── */
+.ctrl-group {
+  padding: 5px 0;
+}
+.ctrl-label {
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+/* ── 旋钮 ────────────────────────────────── */
+.knob-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.knob {
+  width: 38px; height: 38px;
+  background: radial-gradient(circle at 40% 35%, #F5F2ED, #C8C3BA);
+  border-radius: 50%;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.25),
+    0 0 0 2px var(--metal-d),
+    inset 0 1px 2px rgba(255,255,255,0.6);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.knob.small { width: 30px; height: 30px; }
+.knob:active { transform: scale(0.95); }
+.knob-dot {
+  position: absolute;
+  top: 6px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 10px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.knob.small .knob-dot { top: 4px; height: 8px; width: 3px; }
+.knob-positions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.knob-positions span {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--metal-d);
+  cursor: pointer;
+  padding: 1px 4px;
+  transition: color 0.15s;
+}
+.knob-positions span.active {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+/* ── 开关按钮 ────────────────────────────── */
+.switch-row {
+  display: flex;
+  gap: 4px;
+}
+.sw-btn {
+  flex: 1;
+  padding: 8px 6px;
+  background: linear-gradient(180deg, #E8E4DF 0%, #D0CBC3 100%);
+  border: none;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-sub);
+  cursor: pointer;
+  box-shadow:
+    0 2px 0 var(--btn-shadow),
+    0 3px 5px rgba(0,0,0,0.15);
+  transition: all 0.08s ease;
+  user-select: none;
+}
+.sw-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--btn-shadow), 0 1px 2px rgba(0,0,0,0.1);
+}
+.sw-btn.active {
+  background: linear-gradient(180deg, #D8D0C0 0%, #C0B8A8 100%);
+  color: var(--text);
+  box-shadow:
+    0 1px 0 var(--btn-shadow),
+    inset 0 2px 3px rgba(0,0,0,0.15);
+  transform: translateY(2px);
+}
+
+/* ── 滑块 ────────────────────────────────── */
+.slider-track {
+  position: relative;
+  height: 20px;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.05) 40%,
+    rgba(255,255,255,0.3) 50%,
+    rgba(0,0,0,0.05) 60%,
+    rgba(0,0,0,0.1) 100%
+  );
+  border-radius: 10px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+.slider-track input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.slider-track input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 16px;
+  background: linear-gradient(180deg, #F0EDE8, #C8C3BA);
+  border-radius: 3px;
+  box-shadow:
+    0 2px 3px rgba(0,0,0,0.3),
+    0 0 0 1px var(--metal-d);
+  cursor: pointer;
+}
+.slider-track input[type="range"]::-webkit-slider-thumb:active {
+  background: linear-gradient(180deg, #D8D3CA, #B8B3AA);
+}
+.tint-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 7px;
+  color: var(--metal-d);
+  margin-top: 2px;
+}
+
+/* ── 硬件按钮 ────────────────────────────── */
+.hw-btn {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 10px 8px;
+  background: linear-gradient(180deg, #EFECE7 0%, #D5D0C8 100%);
+  border: none;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow:
+    0 3px 0 var(--btn-shadow),
+    0 4px 6px rgba(0,0,0,0.18);
+  transition: all 0.08s ease;
+  user-select: none;
+  position: relative;
+  top: 0;
+}
+.hw-btn:active {
+  top: 3px;
+  box-shadow: 0 1px 0 var(--btn-shadow), 0 1px 2px rgba(0,0,0,0.1);
+}
+.hw-btn.primary {
+  background: linear-gradient(180deg, #F2EDE5 0%, #D8D0C0 100%);
+  color: var(--text);
+  font-weight: bold;
+}
+.hw-btn.danger {
+  background: linear-gradient(180deg, #E8D0CC 0%, #C8A8A0 100%);
+  color: #4A1810;
+  box-shadow: 0 3px 0 #A08078, 0 4px 6px rgba(0,0,0,0.18);
+}
+
+/* ── 指示灯 ──────────────────────────────── */
+.indicator-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.led {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #3A3630;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+.led.on {
+  background: #44DD44;
+  box-shadow:
+    0 0 6px #44FF44,
+    0 0 12px rgba(68,255,68,0.4),
+    inset 0 0 2px rgba(255,255,255,0.4);
+}
+.led-label {
+  font-family: var(--mono);
+  font-size: 7px;
+  color: var(--text-sub);
+  margin-right: 8px;
+}
+
+/* ══════════════════════════════════════════════
+   CRT 屏幕单元
+   ══════════════════════════════════════════════ */
+#screen-unit {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#screen-bezel {
+  flex: 1;
+  background: linear-gradient(180deg, #3A3632 0%, #2A2622 100%);
+  border-radius: 8px;
+  padding: 16px 16px 10px;
+  box-shadow:
+    inset 0 4px 8px rgba(0,0,0,0.5),
+    0 2px 4px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── CRT 玻璃 ────────────────────────────── */
+#crt-glass {
+  flex: 1;
+  position: relative;
+  background: var(--crt-bg);
+  border-radius: 18px / 22px;
+  overflow: hidden;
+  box-shadow:
+    /* 玻璃内凹 */
+    inset 0 6px 16px rgba(0,0,0,0.6),
+    inset 0 0 60px rgba(0,0,0,0.3),
+    /* 边缘高光 */
+    0 0 0 3px #1A1814,
+    0 0 0 5px #3A3630;
+}
+
+/* ── 屏幕内容 ────────────────────────────── */
+#crt-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  padding: 20px 24px;
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--crt-amber);
+  text-shadow: 0 0 4px var(--crt-glow);
+  line-height: 1.6;
+}
+/* 滚动条 CRT 风格 */
+#crt-content::-webkit-scrollbar { width: 6px; }
+#crt-content::-webkit-scrollbar-track { background: transparent; }
+#crt-content::-webkit-scrollbar-thumb {
+  background: var(--crt-amber);
+  opacity: 0.3;
+  border-radius: 3px;
+}
+
+.crt-page { display: none; }
+.crt-page.active { display: block; }
+
+/* ── CRT 横幅 ────────────────────────────── */
+.crt-banner {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--crt-amber);
+  text-shadow: 0 0 6px var(--crt-glow);
+  margin-bottom: 20px;
+  white-space: pre;
+}
+
+.crt-prompt {
+  font-size: 16px;
+  color: var(--crt-amber-l);
+  text-shadow: 0 0 8px var(--crt-glow);
+  margin: 8px 0;
+}
+
+.crt-hint {
+  font-size: 10px;
+  color: var(--crt-amber-d);
+  text-shadow: 0 0 2px rgba(255,176,0,0.1);
+  margin: 4px 0;
+}
+.cursor-blink {
+  animation: crtCursor 1s steps(2) infinite;
+}
+@keyframes crtCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* CRT 内按钮 */
+.crt-btn {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid var(--crt-amber);
+  color: var(--crt-amber);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 16px;
+  cursor: pointer;
+  text-shadow: 0 0 4px var(--crt-glow);
+  box-shadow: 0 0 6px var(--crt-glow);
+  transition: all 0.1s;
+  margin: 4px;
+}
+.crt-btn:hover {
+  background: var(--crt-amber);
+  color: var(--crt-bg);
+  text-shadow: none;
+  box-shadow: 0 0 12px var(--crt-glow);
+}
+
+/* CRT 网格（五十音） */
+.crt-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--crt-amber-d);
+  border: 1px solid var(--crt-amber-d);
+}
+.crt-cell {
+  background: var(--crt-bg);
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--jp);
+  transition: background 0.1s;
+}
+.crt-cell:hover {
+  background: #1A1800;
+}
+.crt-cell .cell-char {
+  display: block;
+  font-size: 24px;
+  color: var(--crt-amber);
+}
+.crt-cell .cell-roma {
+  display: block;
+  font-size: 9px;
+  color: var(--crt-amber-d);
+  font-family: var(--mono);
+}
+.crt-cell.selected {
+  background: var(--crt-amber);
+}
+.crt-cell.selected .cell-char,
+.crt-cell.selected .cell-roma { color: var(--crt-bg); text-shadow: none; }
+.crt-cell.correct {
+  border: 2px solid var(--crt-amber);
+  box-shadow: inset 0 0 8px var(--crt-glow);
+}
+.crt-cell.wrong {
+  border: 2px solid #FF4444;
+  opacity: 0.6;
+}
+
+/* CRT 行选择器 */
+.crt-row-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.crt-row-tab {
+  padding: 4px 8px;
+  border: 1px solid var(--crt-amber-d);
+  color: var(--crt-amber-d);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.1s;
+}
+.crt-row-tab:hover, .crt-row-tab.active {
+  background: var(--crt-amber);
+  color: var(--crt-bg);
+  text-shadow: none;
+}
+
+/* CRT 详情大字 */
+.crt-detail-char {
+  font-family: var(--jp);
+  font-size: 64px;
+  text-align: center;
+  color: var(--crt-amber-l);
+  text-shadow: 0 0 16px var(--crt-glow), 0 0 32px var(--crt-glow);
+  line-height: 1.2;
+}
+
+/* CRT 测验选项 */
+.crt-quiz-opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.crt-quiz-opt {
+  padding: 16px;
+  border: 2px solid var(--crt-amber-d);
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--jp);
+  font-size: 28px;
+  color: var(--crt-amber);
+  text-shadow: 0 0 6px var(--crt-glow);
+  transition: all 0.1s;
+  background: transparent;
+}
+.crt-quiz-opt:hover {
+  border-color: var(--crt-amber-l);
+  box-shadow: inset 0 0 12px var(--crt-glow);
+}
+.crt-quiz-opt.correct {
+  border-color: #44FF44;
+  color: #44FF44;
+  text-shadow: 0 0 8px rgba(68,255,68,0.5);
+}
+.crt-quiz-opt.wrong {
+  border-color: #FF4444;
+  color: #FF4444;
+  opacity: 0.6;
+}
+
+/* CRT 进度条 */
+.crt-progress {
+  height: 6px;
+  background: var(--crt-amber-d);
+  margin: 8px 0;
+}
+.crt-progress-bar {
+  height: 100%;
+  background: var(--crt-amber);
+  box-shadow: 0 0 6px var(--crt-glow);
+}
+
+/* CRT 分数 */
+.crt-score {
+  font-family: var(--mono);
+  font-size: 11px;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+/* CRT 结果 */
+.crt-result {
+  text-align: center;
+}
+.crt-result .big-score {
+  font-size: 48px;
+  color: var(--crt-amber-l);
+  text-shadow: 0 0 20px var(--crt-glow);
+}
+.crt-result .stars {
+  font-size: 28px;
+  margin: 8px 0;
+}
+
+/* ══════════════════════════════════════════════
+   CRT 效果叠加层
+   ══════════════════════════════════════════════ */
+
+/* 扫描线 */
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  border-radius: 18px / 22px;
+}
+
+/* 暗角 */
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0,0,0,0.2) 75%,
+    rgba(0,0,0,0.5) 100%
+  );
+  border-radius: 18px / 22px;
+}
+
+/* 玻璃反光 */
+.crt-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.02) 30%,
+    transparent 50%,
+    transparent 70%,
+    rgba(255,255,255,0.015) 100%
+  );
+  border-radius: 18px / 22px;
+}
+
+/* ── 屏幕标签 ────────────────────────────── */
+.screen-badge {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 8px;
+  color: #888078;
+  letter-spacing: 3px;
+  margin-top: 6px;
+}
+.screen-led-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 3px;
+}
+.s-led {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: #3A3630;
+}
+.s-led.on { background: #44DD44; box-shadow: 0 0 3px #44FF44; }
+.s-led.dim { background: #448844; }
+
+/* ══════════════════════════════════════════════
+   底部状态栏
+   ══════════════════════════════════════════════ */
+#status-bar {
+  margin-top: 8px;
+  padding: 5px 8px;
+  background: #2A2622;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--crt-amber);
+  display: flex;
+  gap: 10px;
+  text-shadow: 0 0 3px var(--crt-glow);
+}
+.status-div { color: #444; }
+
+/* ══════════════════════════════════════════════
+   CRT 弹出提示框（Tooltip Popover）
+   点击单词弹出关联词汇和例句
+   动画：磷光绽放 + 扫描线揭示 + 轻微抖动
+   ══════════════════════════════════════════════ */
+
+/* 遮罩层 — 点击空白处关闭 */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: transparent;
+  cursor: default;
+}
+
+/* 弹出框主体 */
+.crt-popover {
+  position: absolute;
+  z-index: 100;
+  min-width: 220px;
+  max-width: 360px;
+  background: #0A0E00;
+  border: 2px solid var(--crt-amber);
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--crt-amber);
+  text-shadow: 0 0 3px var(--crt-glow);
+  box-shadow:
+    0 0 20px rgba(255,176,0,0.2),
+    0 0 40px rgba(255,176,0,0.08),
+    inset 0 0 30px rgba(0,0,0,0.4);
+  /* 扫描线叠加 */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.06) 2px,
+      rgba(0,0,0,0.06) 4px
+    );
+  /* 出现动画 */
+  animation: popoverAppear 0.25s ease-out;
+  pointer-events: auto;
+}
+
+/* 弹出框三角箭头 */
+.crt-popover::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 24px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--crt-amber);
+  filter: drop-shadow(0 -2px 4px rgba(255,176,0,0.3));
+}
+
+/* 箭头在下方的变体 */
+.crt-popover.arrow-bottom::before {
+  top: auto;
+  bottom: -9px;
+  border-bottom: none;
+  border-top: 8px solid var(--crt-amber);
+}
+
+@keyframes popoverAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+    box-shadow: 0 0 0px rgba(255,176,0,0), inset 0 0 30px rgba(0,0,0,0.4);
+  }
+  40% {
+    opacity: 0.7;
+    box-shadow: 0 0 30px rgba(255,176,0,0.4), 0 0 60px rgba(255,176,0,0.15), inset 0 0 30px rgba(0,0,0,0.4);
+  }
+  70% {
+    transform: translateY(1px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 20px rgba(255,176,0,0.2), 0 0 40px rgba(255,176,0,0.08), inset 0 0 30px rgba(0,0,0,0.4);
+  }
+}
+
+/* 弹出框标题 */
+.crt-popover-title {
+  font-family: var(--jp);
+  font-size: 28px;
+  text-align: center;
+  color: var(--crt-amber-l);
+  text-shadow: 0 0 12px var(--crt-glow), 0 0 24px var(--crt-glow);
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+
+.crt-popover-roma {
+  text-align: center;
+  font-size: 9px;
+  color: var(--crt-amber-d);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+/* 弹出框分区 */
+.crt-popover-section {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,176,0,0.2);
+}
+
+.crt-popover-label {
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: var(--crt-amber-d);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* 关联词标签 */
+.crt-popover-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.crt-popover-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--crt-amber-d);
+  font-size: 9px;
+  color: var(--crt-amber);
+  cursor: pointer;
+  transition: all 0.1s;
+  text-shadow: 0 0 2px var(--crt-glow);
+}
+
+.crt-popover-tag:hover {
+  background: var(--crt-amber);
+  color: var(--crt-bg);
+  text-shadow: none;
+  box-shadow: 0 0 8px var(--crt-glow);
+}
+
+/* 例句 */
+.crt-popover-sentence {
+  font-size: 11px;
+  color: var(--crt-amber-l);
+  line-height: 1.5;
+  text-shadow: 0 0 4px var(--crt-glow);
+  padding: 4px 0;
+}
+
+/* 弹出框操作按钮 */
+.crt-popover-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,176,0,0.2);
+}
+
+.crt-popover-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid var(--crt-amber-d);
+  background: transparent;
+  color: var(--crt-amber);
+  font-family: var(--mono);
+  font-size: 9px;
+  cursor: pointer;
+  text-shadow: 0 0 2px var(--crt-glow);
+  transition: all 0.1s;
+  text-align: center;
+}
+
+.crt-popover-btn:hover {
+  background: var(--crt-amber);
+  color: var(--crt-bg);
+  text-shadow: none;
+  box-shadow: 0 0 8px var(--crt-glow);
+}
+
+/* 关闭按钮 */
+.crt-popover-close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--crt-amber-d);
+  font-family: var(--mono);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.1s;
+}
+
+.crt-popover-close:hover {
+  color: var(--crt-amber-l);
+  text-shadow: 0 0 6px var(--crt-glow);
+}
+
+/* 弹出框在小屏幕上的适配 */
+@media (max-width: 860px) {
+  .crt-popover {
+    max-width: 280px;
+    min-width: 180px;
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+  .crt-popover-title {
+    font-size: 22px;
+  }
+  .crt-popover-sentence {
+    font-size: 10px;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   响应式
+   ══════════════════════════════════════════════ */
+@media (max-width: 860px) {
+  body { padding: 8px; align-items: flex-start; }
+  #terminal { border-radius: 8px; padding: 10px 8px; }
+  #work-area {
+    flex-direction: column;
+    height: auto;
+    gap: 8px;
+  }
+  #control-panel {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+    overflow-y: visible;
+  }
+  .panel-label { width: 100%; }
+  .ctrl-group { flex: 1; min-width: 80px; }
+  .ctrl-label { font-size: 6px; }
+  .knob { width: 28px; height: 28px; }
+  .knob.small { width: 24px; height: 24px; }
+  .knob-dot { top: 4px; height: 7px; }
+  .knob.small .knob-dot { top: 3px; height: 6px; }
+  .hw-btn { padding: 7px 4px; font-size: 7px; }
+  .sw-btn { padding: 6px 4px; font-size: 7px; }
+
+  #screen-unit { min-height: 380px; }
+  #screen-bezel { padding: 8px 8px 6px; }
+  #crt-content { padding: 12px 14px; font-size: 11px; }
+  .crt-banner { font-size: 8px; }
+  .crt-detail-char { font-size: 40px; }
+  .crt-quiz-opts { grid-template-columns: 1fr; }
+  .crt-quiz-opt { font-size: 22px; padding: 12px; }
+  .crt-grid .cell-char { font-size: 18px; }
+
+  #status-bar { font-size: 8px; gap: 6px; }
+  #nameplate { flex-wrap: wrap; gap: 4px; }
+}
