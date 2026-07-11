@@ -41,12 +41,27 @@ async function speakText(text) {
     utter.pitch = TTS.pitch;
     utter.volume = TTS.volume;  // 最大音量
 
-    // 尝试找日语声音（优先选择高质量声音）
+    // 语音选择策略（桌面端与移动端不同）
     const voices = speechSynthesis.getVoices();
-    // 优先选 Microsoft 或 Google 的日语声音（通常更清晰）
-    let jaVoice = voices.find(v => v.lang === 'ja-JP' && (v.name.includes('Google') || v.name.includes('Microsoft')));
-    if (!jaVoice) jaVoice = voices.find(v => v.lang.startsWith('ja') && v.localService);
-    if (!jaVoice) jaVoice = voices.find(v => v.lang.startsWith('ja'));
+    let jaVoice = null;
+
+    if (_isMobile) {
+      // 移动端：Google TTS 本地语音电子音重，优先选择非 Google 的高质量语音
+      // 1) 优先选非 Google 的 ja-JP 本地语音（如厂商内置语音，通常更自然）
+      jaVoice = voices.find(v => v.lang === 'ja-JP' && v.localService && !v.name.includes('Google'));
+      // 2) 其次选网络语音（localService: false），通常质量更高
+      if (!jaVoice) jaVoice = voices.find(v => v.lang === 'ja-JP' && !v.localService);
+      // 3) 再次选 iOS 设备的高质量语音（Kyoko 等）
+      if (!jaVoice) jaVoice = voices.find(v => v.lang.startsWith('ja') && (v.name.includes('Kyoko') || v.name.includes('O-ren')));
+      // 4) 兜底：任意日语语音
+      if (!jaVoice) jaVoice = voices.find(v => v.lang.startsWith('ja'));
+    } else {
+      // 桌面端：优先选 Microsoft 或 Google 的日语声音（通常更清晰）
+      jaVoice = voices.find(v => v.lang === 'ja-JP' && (v.name.includes('Google') || v.name.includes('Microsoft')));
+      if (!jaVoice) jaVoice = voices.find(v => v.lang.startsWith('ja') && v.localService);
+      if (!jaVoice) jaVoice = voices.find(v => v.lang.startsWith('ja'));
+    }
+
     if (jaVoice) utter.voice = jaVoice;
 
     utter.onend = () => { TTS.speaking = false; resolve(); };
