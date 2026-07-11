@@ -927,8 +927,11 @@ D.btnNext.addEventListener('click', () => {
   else if (APP.currentPage === 'quiz' && QUIZ.active && QUIZ.answered) nextQuizQuestion();
 });
 D.btnReset.addEventListener('click', () => {
-  navigateTo('home');
+  // 回到初始欢迎界面（不显示场景卡片）
+  APP.currentPage = 'home';
+  renderHome(false);
   D.statusScore.textContent = 'SCORE: --';
+  D.statusMsg.textContent = 'SYS OK';
 });
 
 // ── 设置抽屉切换 ──
