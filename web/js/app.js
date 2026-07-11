@@ -9,6 +9,10 @@ const APP = {
   audioOn: true,
   popoverVisible: false,
   popoverKana: null,
+  // 场景学习
+  currentScenario: null,     // 当前场景对象引用
+  scenarioTab: 'words',      // 'words' | 'phrases' | 'dialogue' | 'culture'
+  scenarioPage: 0,           // 单词/短句分页
 };
 
 // ── DOM ──────────────────────────────────────
@@ -89,16 +93,68 @@ function navigateTo(page, data) {
   if (target) target.classList.add('active');
 
   switch (page) {
-    case 'home':          D.statusMsg.textContent = 'SYS OK'; break;
+    case 'home':
+      renderHome();
+      break;
     case 'kana-chart':    renderKanaChart(data || APP.selectedRow); break;
     case 'kana-detail':   renderKanaDetail(data); break;
     case 'quiz':          startQuiz(); break;
+    case 'scenario':      renderScenarioPage(data); break;
   }
 
   // 更新旋钮位置
   D.knobPositions.forEach(sp => {
     sp.classList.toggle('active', sp.dataset.mode === page);
   });
+}
+
+// 渲染主页（含场景卡片网格 + 随机名言）
+function renderHome() {
+  // 检查主页 DOM 是否存在（可能被其他页面的 innerHTML 替换掉了）
+  let homePage = $('#page-home');
+  if (!homePage) {
+    D.crt.innerHTML = `
+      <div class="crt-page active" id="page-home">
+        <pre class="crt-banner">
+╔════════════════════════════════╗
+║    ドット先生  DOT SENSEI     ║
+║    LANGUAGE LEARNING TERM    ║
+║    MODEL DS-1  v2.0  RAM 64K ║
+╚════════════════════════════════╝
+        </pre>
+        <p class="crt-prompt">READY.</p>
+        <p class="crt-hint">> シーンを 選んでください</p>
+        <div id="crt-quote"></div>
+        <div id="scenario-grid"></div>
+        <p class="crt-hint cursor-blink" style="margin-top:12px;">■</p>
+      </div>
+      <div class="crt-page" id="page-kana-chart"></div>
+      <div class="crt-page" id="page-kana-detail"></div>
+      <div class="crt-page" id="page-quiz"></div>
+      <div class="crt-page" id="page-scenario"></div>
+    `;
+  } else {
+    // 已存在，只切换 active
+    $$('.crt-page').forEach(p => p.classList.remove('active'));
+    homePage.classList.add('active');
+  }
+
+  D.statusMsg.textContent = 'SYS OK';
+  renderRandomQuote();
+  renderScenarioList();
+}
+
+// 随机展示一句名言
+function renderRandomQuote() {
+  const container = $('#crt-quote');
+  if (!container || typeof QUOTES === 'undefined') return;
+
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  container.innerHTML = `
+    <div class="crt-quote-text">「${q.jp}」</div>
+    <div class="crt-quote-cn">${q.cn}</div>
+    <div class="crt-quote-source">—— ${q.source}</div>
+  `;
 }
 
 // ═══════════════════════════════════════════════
@@ -539,6 +595,218 @@ function exitQuiz() {
 function renderQuiz() { navigateTo('quiz'); }
 
 // ═══════════════════════════════════════════════
+// 场景化学习
+// ═══════════════════════════════════════════════
+
+// 每页显示数量
+const WORDS_PER_PAGE = 5;
+const PHRASES_PER_PAGE = 4;
+
+// 主页渲染场景卡片网格
+function renderScenarioList() {
+  const grid = document.getElementById('scenario-grid');
+  if (!grid) return;
+
+  let cards = '';
+  SCENARIOS.forEach((sc, i) => {
+    cards += `
+      <button class="scenario-card" onclick="navigateToScenario('${sc.id}')">
+        <span class="sc-icon">${sc.icon}</span>
+        <span class="sc-info">
+          <span class="sc-name">${sc.name}</span><br>
+          <span class="sc-cn">${sc.nameCN}</span>
+        </span>
+      </button>`;
+  });
+
+  grid.innerHTML = cards;
+}
+
+// 进入场景
+function navigateToScenario(scenarioId) {
+  const sc = SCENARIOS.find(s => s.id === scenarioId);
+  if (!sc) return;
+  APP.currentScenario = sc;
+  APP.scenarioTab = 'words';
+  APP.scenarioPage = 0;
+  navigateTo('scenario', sc);
+}
+
+// 渲染场景学习页
+function renderScenarioPage() {
+  const sc = APP.currentScenario;
+  if (!sc) { navigateTo('home'); return; }
+
+  let tabs = '';
+  const tabDefs = [
+    { id: 'words',    label: '📝 単語' },
+    { id: 'phrases',  label: '💬 フレーズ' },
+    { id: 'dialogue', label: '🎭 会話' },
+    { id: 'culture',  label: '🎌 豆知識' },
+  ];
+  tabDefs.forEach(t => {
+    const cls = t.id === APP.scenarioTab ? ' active' : '';
+    tabs += `<button class="scenario-tab${cls}" onclick="switchScenarioTab('${t.id}')">${t.label}</button>`;
+  });
+
+  // 内容区（由各 Tab 函数填充）
+  let content = '';
+  switch (APP.scenarioTab) {
+    case 'words':    content = renderWordsContent(); break;
+    case 'phrases':  content = renderPhrasesContent(); break;
+    case 'dialogue': content = renderDialogueContent(); break;
+    case 'culture':  content = renderCultureContent(); break;
+  }
+
+  D.crt.innerHTML = `
+    <div class="crt-page active" id="page-scenario">
+      <div class="scenario-header">
+        <span class="sh-title">${sc.icon} ${sc.name}</span>
+        <button class="sh-back" onclick="navigateTo('home')">← BACK</button>
+      </div>
+      <div class="scenario-tabs">${tabs}</div>
+      <div id="scenario-content">${content}</div>
+    </div>
+  `;
+
+  D.statusMsg.textContent = `SCENE: ${sc.nameCN}`;
+}
+
+// Tab 切换
+function switchScenarioTab(tab) {
+  APP.scenarioTab = tab;
+  APP.scenarioPage = 0;
+  renderScenarioPage();
+}
+
+// ── 单词 Tab ──
+function renderWordsContent() {
+  const sc = APP.currentScenario;
+  const words = sc.words;
+  const totalPages = Math.ceil(words.length / WORDS_PER_PAGE);
+  const page = APP.scenarioPage;
+  const start = page * WORDS_PER_PAGE;
+  const pageWords = words.slice(start, start + WORDS_PER_PAGE);
+
+  let html = '';
+  pageWords.forEach((w, i) => {
+    const idx = start + i;
+    html += `
+      <div class="word-card">
+        <div class="wc-jp">${w.jp}</div>
+        <div class="wc-reading">${w.reading}</div>
+        <div class="wc-cn">${w.cn}</div>
+        <button class="wc-speak" onclick="event.stopPropagation();doScenarioSpeak('${w.reading.replace(/'/g, "\\'")}')">▶ SPEAK</button>
+      </div>`;
+  });
+
+  html += pagerHTML(page, totalPages, 'words');
+  return html;
+}
+
+// ── 短句 Tab ──
+function renderPhrasesContent() {
+  const sc = APP.currentScenario;
+  const phrases = sc.phrases;
+  const totalPages = Math.ceil(phrases.length / PHRASES_PER_PAGE);
+  const page = APP.scenarioPage;
+  const start = page * PHRASES_PER_PAGE;
+  const pagePhrases = phrases.slice(start, start + PHRASES_PER_PAGE);
+
+  let html = '';
+  pagePhrases.forEach(p => {
+    html += `
+      <div class="phrase-card">
+        <div class="pc-jp">${p.jp}</div>
+        <div class="pc-reading">${p.reading}</div>
+        <div class="pc-cn">💡 ${p.cn}</div>
+        <button class="pc-speak" onclick="event.stopPropagation();doScenarioSpeak('${p.jp.replace(/'/g, "\\'")}')">▶ SPEAK</button>
+      </div>`;
+  });
+
+  html += pagerHTML(page, totalPages, 'phrases');
+  return html;
+}
+
+// ── 对话 Tab ──
+function renderDialogueContent() {
+  const sc = APP.currentScenario;
+  const dlg = sc.dialogue;
+
+  let html = `<p class="crt-prompt" style="font-size:11px;">🎭 ${dlg.title}</p>`;
+
+  dlg.lines.forEach((line, i) => {
+    const isCustomer = line.role === dlg.roles[1]; // 第二个角色 = 学习者角色
+    const cls = isCustomer ? ' dialogue-line dl-customer' : ' dialogue-line';
+    html += `
+      <div class="${cls}">
+        <div class="dl-role">${line.role}</div>
+        <div class="dl-jp">${line.jp}</div>
+        <div class="dl-reading">${line.reading}</div>
+        <div class="dl-cn">${line.cn}</div>
+        <button class="dl-speak" onclick="event.stopPropagation();doScenarioSpeak('${line.jp.replace(/'/g, "\\'")}')">▶ SPEAK</button>
+      </div>`;
+  });
+
+  return html;
+}
+
+// ── 文化贴士 Tab ──
+function renderCultureContent() {
+  const sc = APP.currentScenario;
+  let html = '';
+  sc.culture.forEach((tip, i) => {
+    html += `
+      <div class="culture-item">
+        <span class="ci-num">0${i+1}</span> ${tip}
+      </div>`;
+  });
+  return html;
+}
+
+// ── 分页器 ──
+function pagerHTML(page, totalPages, tabId) {
+  if (totalPages <= 1) return '';
+  return `
+    <div class="scenario-pager">
+      <button onclick="scenarioPrevPage('${tabId}')" ${page <= 0 ? 'disabled' : ''}>◀ PREV</button>
+      <span>${page + 1} / ${totalPages}</span>
+      <button onclick="scenarioNextPage('${tabId}')" ${page >= totalPages - 1 ? 'disabled' : ''}>NEXT ▶</button>
+    </div>`;
+}
+
+function scenarioPrevPage() {
+  if (APP.scenarioPage > 0) {
+    APP.scenarioPage--;
+    renderScenarioPage();
+  }
+}
+function scenarioNextPage() {
+  const sc = APP.currentScenario;
+  const perPage = APP.scenarioTab === 'words' ? WORDS_PER_PAGE : PHRASES_PER_PAGE;
+  const items = APP.scenarioTab === 'words' ? sc.words : sc.phrases;
+  const maxPage = Math.ceil(items.length / perPage) - 1;
+  if (APP.scenarioPage < maxPage) {
+    APP.scenarioPage++;
+    renderScenarioPage();
+  }
+}
+
+// ── 场景朗读 ──
+async function doScenarioSpeak(text) {
+  if (!APP.audioOn || !text) return;
+  D.ledAudio.classList.add('on');
+  D.ledData.classList.add('on');
+  D.statusMsg.textContent = 'SPEAKING...';
+  try { await speakText(text); } catch(e) { console.warn('Scenario speak:', e); }
+  D.statusMsg.textContent = 'SYS OK';
+  setTimeout(() => {
+    D.ledAudio.classList.remove('on');
+    D.ledData.classList.remove('on');
+  }, 400);
+}
+
+// ═══════════════════════════════════════════════
 // 控件事件绑定
 // ═══════════════════════════════════════════════
 
@@ -593,13 +861,13 @@ if (knobBright) {
 // 模式旋钮
 const knobMode = $('#knob-mode');
 let modeIdx = 0;
-const modes = ['home', 'kana-chart', 'quiz'];
+const modes = ['home', 'kana-chart', 'quiz', 'kana-detail'];
 if (knobMode) {
   knobMode.addEventListener('click', () => {
     modeIdx = (modeIdx + 1) % modes.length;
     navigateTo(modes[modeIdx]);
     const dot = knobMode.querySelector('.knob-dot');
-    if (dot) dot.style.transform = `translateX(-50%) rotate(${modeIdx * 120}deg)`;
+    if (dot) dot.style.transform = `translateX(-50%) rotate(${modeIdx * 90}deg)`;
   });
 }
 

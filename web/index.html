@@ -46,6 +46,7 @@
             <span data-mode="kana-chart">五十音</span>
             <span data-mode="quiz">テスト</span>
             <span data-mode="kana-detail">詳細</span>
+            <span data-mode="home">场景</span>
           </div>
         </div>
       </div>
@@ -127,12 +128,15 @@
 ╚════════════════════════════════╝
               </pre>
               <p class="crt-prompt">READY.</p>
-              <p class="crt-hint">TURN MODE KNOB TO BEGIN</p>
-              <p class="crt-hint cursor-blink">■</p>
+              <p class="crt-hint">> シーンを 選んでください</p>
+              <div id="crt-quote"></div>
+              <div id="scenario-grid"></div>
+              <p class="crt-hint cursor-blink" style="margin-top:12px;">■</p>
             </div>
             <div class="crt-page" id="page-kana-chart"></div>
             <div class="crt-page" id="page-kana-detail"></div>
             <div class="crt-page" id="page-quiz"></div>
+            <div class="crt-page" id="page-scenario"></div>
           </div>
 
           <!-- CRT 效果叠加层 -->
@@ -169,6 +173,8 @@
 
 <!-- ══ JavaScript ══ -->
 <script src="js/kana-data.js"></script>
+<script src="js/scenario-data.js"></script>
+<script src="js/quotes-data.js"></script>
 <script src="js/tts.js"></script>
 <script src="js/quiz.js"></script>
 <script src="js/app.js"></script>
