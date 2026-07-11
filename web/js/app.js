@@ -609,7 +609,7 @@ const CULTURE_PER_PAGE = 4;
 // 主页渲染场景卡片网格
 function renderScenarioList() {
   const grid = document.getElementById('scenario-grid');
-  if (!grid) return;
+  if (!grid || typeof SCENARIOS === 'undefined') return;
 
   let cards = '';
   SCENARIOS.forEach((sc, i) => {
@@ -628,6 +628,7 @@ function renderScenarioList() {
 
 // 进入场景
 function navigateToScenario(scenarioId) {
+  if (typeof SCENARIOS === 'undefined') return;
   const sc = SCENARIOS.find(s => s.id === scenarioId);
   if (!sc) return;
   APP.currentScenario = sc;
